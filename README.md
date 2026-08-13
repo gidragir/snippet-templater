@@ -1,41 +1,28 @@
 # Snippet Templater for Obsidian
 
-**Snippet Templater** is an Obsidian plugin that transforms static code snippets and templates into interactive live widgets. It automatically extracts variables from your code blocks, renders dynamic input fields, and provides live output preview with real-time substitution and syntax highlighting.
+**Snippet Templater** turns static code blocks and scripts into interactive, dynamic widgets inside Obsidian. It automatically parses variables, renders real-time input fields, and live-substitutes values into syntax-highlighted previews.
 
----
+![Snippet Templater Preview](assets/preview.png)
 
-## Features
+## ✨ Key Features
 
-- ⚡ **Automatic Variable Extraction**: Automatically detects variables written as `$VARIABLE` or `${VARIABLE}`.
-- 🎛️ **Live Interactive Inputs**: Generates input fields for detected variables directly inside your note.
-- 👁️ **Side-by-Side Live Preview**: Updates the formatted result in real time as you type.
-- 🎨 **Code Block Highlighting**: Retains full syntax highlighting for languages (Docker, Bash, Python, SQL, YAML, etc.).
-- 🏷️ **Multiple Codeblock Identifiers**: Works seamlessly with ```snippet-templater```, ```snippet-template```, and ```script-template```.
-- 💬 **Flexible Language Overrides**: Specify target language in the fence header (e.g. ```` ```snippet-template lang:python ````) or on the first line inside the block (`# lang: python` or `// lang: typescript`).
+|   |   |
+|---|---|
+|**Feature**|**Description**|
+|⚡ **Auto Variable Extraction**|Detects variables defined as `$VARIABLE` or `${VARIABLE}` instantly.|
+|🎛️ **Live Inputs**|Generates neat input forms right above or beside your code block.|
+|👁️ **Real-Time Preview**|Instant updating and substitution as you type into inputs.|
+|🎨 **Syntax Highlighting**|Preserves full theme colors for Docker, Bash, Python, SQL, YAML, etc.|
+|🏷️ **Multiple Fences**|Works with `snippet-templater`, `snippet-template`, and `script-template`.|
+|💬 **Language Directives**|Define language via fence flags (`lang:python`) or first-line comments.|
 
----
+## 🚀 Quick Start & Examples
 
-## Installation
+Wrap your template code inside a supported code block identifier (`snippet-template`, `snippet-templater`, or `script-template`).
 
-### From Community Plugins
-*(Coming soon once accepted into the Obsidian Community Catalog)*
+### 1. Bash / Docker Automation
 
-### Manual Installation
-1. Download the latest release (`main.js`, `manifest.json`, and `styles.css`) from the [Releases](https://github.com/gidragir/snippet-templater/releases) page.
-2. Create a folder named `snippet-templater` inside your vault's plugin directory:
-   `<VaultPath>/.obsidian/plugins/snippet-templater/`
-3. Move the downloaded files into that folder.
-4. Reload Obsidian and enable **Snippet Templater** in **Settings → Community plugins**.
-
----
-
-## How to Use & Examples
-
-To turn any snippet into an interactive template, wrap your code in a code block with one of the supported language specifiers (`snippet-templater`, `snippet-template`, or `script-template`).
-
-### Example 1: Docker Build & Push Script
-
-```markdown
+````
 ```snippet-template lang:bash
 IMAGE="my-app"
 TAG="latest"
@@ -43,38 +30,32 @@ TAG="latest"
 docker build -t $IMAGE:$TAG .
 docker push $IMAGE:$TAG
 ```
-```
+````
 
-**What happens**:
-1. The plugin extracts `$IMAGE` and `$TAG`.
-2. Input fields for `IMAGE` and `TAG` appear on the left.
-3. The right column displays the ready-to-run bash script updating live as values are entered.
+> **How it works:**
+> 
+> 1. Extracts `$IMAGE` and `$TAG` variables.
+>     
+> 2. Renders inputs for `IMAGE` and `TAG`.
+>     
+> 3. Generates a copy-pasteable script with filled values.
+>     
 
----
+### 2. Python Scripting
 
-### Example 2: Python Data Processing Script
-
-```markdown
-```script-template
-# lang: python
+````
+```script-template lang: python
 import pandas as pd
 
 df = pd.read_csv("${INPUT_FILE}")
 filtered = df[df["status"] == "${STATUS}"]
 filtered.to_json("${OUTPUT_FILE}")
 ```
-```
+````
 
-**What happens**:
-1. Language is parsed from the `# lang: python` directive on the first line.
-2. Input fields for `INPUT_FILE`, `STATUS`, and `OUTPUT_FILE` are generated.
-3. Braced variables like `${INPUT_FILE}` are replaced cleanly upon typing.
+### 3. SQL Query Template
 
----
-
-### Example 3: SQL Query Template
-
-```markdown
+````
 ```snippet-templater lang:sql
 SELECT id, username, email, created_at
 FROM users
@@ -82,71 +63,83 @@ WHERE status = '$USER_STATUS'
   AND created_at >= '$START_DATE'
 LIMIT $LIMIT_COUNT;
 ```
+````
+
+## 📖 Syntax & Configuration
+
+### Language Overrides
+
+By default, language highlighting falls back to `bash`. You can specify a custom language in two ways:
+
+1. **Header Flag**:
+    
+    ````
+    ```snippet-template lang:python
+    print("Hello, $NAME")
+    ```
+    ````
+    
+2. **Inline Comment Directive**:
+    
+    ````
+    ```script-template
+    // lang: typescript
+    const user: string = "$USER_NAME";
+    ```
+    ````
+    
+
+### Variable Matching Rules
+
+The parser recognizes variables following standard naming conventions (`[A-Za-z_][A-Za-z0-9_]*`):
+
+- Simple format: `$VARIABLE_NAME`
+    
+- Braced format: `${VARIABLE_NAME}`
+    
+
+## ⚙️ Installation
+
+### Option A: Manual Installation
+
+1. Download `main.js`, `manifest.json`, and `styles.css` from the latest [Releases](https://github.com/gidragir/snippet-templater/releases "null").
+    
+2. Navigate to your vault's plugin directory:
+    
+    ```
+    <VaultPath>/.obsidian/plugins/snippet-templater/
+    ```
+    
+3. Place the downloaded files in that directory.
+    
+4. Reload Obsidian and enable **Snippet Templater** under **Settings → Community plugins**.
+    
+
+### Option B: Community Plugins _(Coming Soon)_
+
+Once approved in the official Obsidian Community Catalog, search for `Snippet Templater` directly inside Obsidian's settings.
+
+## 🛠️ Development
+
+Requires **Node.js (v18+)** and **pnpm**.
+
 ```
-
----
-
-## Code Block Syntax Reference
-
-### 1. Specifying Code Language
-By default, snippets fall back to `bash`. You can specify any language supported by Obsidian using either:
-
-- **Fence Header syntax**:
-  ````markdown
-  ```script-template lang:python
-  print("Hello, $NAME")
-  ```
-  ````
-
-- **First-line comment directive**:
-  ````markdown
-  ```script-template
-  // lang: typescript
-  const user: string = "$USER_NAME";
-  ```
-  ````
-
-### 2. Variable Syntax
-The parser detects two variable formats:
-- `$VARIABLE_NAME`
-- `${VARIABLE_NAME}`
-
-Variables must start with a letter or underscore followed by alphanumeric characters or underscores (`[A-Za-z_][A-Za-z0-9_]*`).
-
----
-
-## Development & Building
-
-This project requires [Node.js](https://nodejs.org/) (v18+) and [pnpm](https://pnpm.io/).
-
-### Setup
-```bash
+# Install dependencies
 pnpm install
-```
 
-### Development (Watch mode)
-```bash
+# Start development mode (watch mode)
 pnpm run dev
-```
 
-### Build for Production
-```bash
+# Build for production
 pnpm run build
-```
 
-### Linting
-```bash
+# Run linter
 pnpm run lint
-```
 
-### Releasing
-Release process is automated with `release-it`:
-```bash
+# Trigger automated release
 pnpm release
 ```
 
----
+## 📄 License
 
-## License
-
-[0-BSD License](LICENSE)
+This project is licensed under the [0-BSD License](https://gemini.google.com/LICENSE "null").
