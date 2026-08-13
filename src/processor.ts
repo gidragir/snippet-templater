@@ -1,4 +1,4 @@
-import { App, Component, MarkdownRenderer, Notice } from 'obsidian';
+import { App, Component, MarkdownRenderer } from 'obsidian';
 import {
 	extractVariables,
 	parseLanguageAndSource,
@@ -35,7 +35,7 @@ export function renderScriptTemplateBlock(
 		cls: 'script-template-section script-template-inputs-section',
 	});
 	inputsSection.createDiv({
-		text: 'Переменные',
+		text: 'Variables',
 		cls: 'script-template-section-title',
 	});
 
@@ -45,7 +45,7 @@ export function renderScriptTemplateBlock(
 
 	if (variables.length === 0) {
 		inputsContainer.createDiv({
-			text: 'Переменные не найдены',
+			text: 'No variables found',
 			cls: 'script-template-empty',
 		});
 	} else {
@@ -61,7 +61,7 @@ export function renderScriptTemplateBlock(
 
 			const inputEl = groupEl.createEl('input', {
 				type: 'text',
-				placeholder: `Значение для $${varName}...`,
+				placeholder: `Value for $${varName}...`,
 				cls: 'script-template-input',
 			});
 
@@ -77,7 +77,7 @@ export function renderScriptTemplateBlock(
 		cls: 'script-template-section script-template-source-section',
 	});
 	sourceSection.createDiv({
-		text: 'Исходный шаблон',
+		text: 'Source template',
 		cls: 'script-template-section-title',
 	});
 
@@ -98,22 +98,12 @@ export function renderScriptTemplateBlock(
 		cls: 'script-template-col script-template-right',
 	});
 
-	// Right Top: Copy action section
-	const actionsSection = rightCol.createDiv({
-		cls: 'script-template-section script-template-actions-section',
-	});
-
-	const copyBtn = actionsSection.createEl('button', {
-		text: 'Скопировать',
-		cls: 'mod-cta script-template-copy-btn',
-	});
-
 	// Right Bottom: Result preview section
 	const previewSection = rightCol.createDiv({
 		cls: 'script-template-section script-template-preview-section',
 	});
 	previewSection.createDiv({
-		text: 'Итоговый результат',
+		text: 'Final result',
 		cls: 'script-template-section-title',
 	});
 
@@ -121,7 +111,6 @@ export function renderScriptTemplateBlock(
 		cls: 'script-template-code-pre',
 	});
 
-	// Helper to recalculate live preview
 	const getCurrentResult = (): string =>
 		substituteVariables(cleanSource, values);
 
@@ -137,20 +126,7 @@ export function renderScriptTemplateBlock(
 		);
 	};
 
-	// Copy button event listener
-	copyBtn.addEventListener('click', () => {
-		void (async () => {
-			const textToCopy = getCurrentResult();
-			try {
-				await navigator.clipboard.writeText(textToCopy);
-				new Notice('Скопировано!');
-			} catch (err) {
-				console.error('Failed to copy text: ', err);
-				new Notice('Ошибка копирования');
-			}
-		})();
-	});
-
 	// Initial render update
 	updatePreview();
 }
+
