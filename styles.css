@@ -120,13 +120,26 @@
 	border-radius: 6px;
 	overflow-x: auto;
 	max-height: 320px;
+	background-color: var(--background-primary, var(--code-background, #1e1e1e));
+	border: 1px solid var(--background-modifier-border);
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .script-template-code-pre pre {
 	margin: 0 !important;
+	padding: 12px 14px !important;
+	background-color: transparent !important;
 	border-radius: 6px !important;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.script-template-code-pre:hover {
+	border-color: var(--interactive-accent);
+	box-shadow: 0 0 0 1px var(--interactive-accent), 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .script-template-code-pre p {
 	margin: 0 !important;
 }
+
+
