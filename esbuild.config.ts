@@ -1,5 +1,5 @@
 import esbuild from 'esbuild';
-import process from 'process';
+import process from 'node:process';
 import { builtinModules } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,7 +18,7 @@ const vaultPluginDir = path.join(
 	'snippet-templater',
 );
 
-const copyToVaultPlugin = {
+const copyToVaultPlugin: esbuild.Plugin = {
 	name: 'copy-to-vault',
 	setup(build) {
 		build.onEnd((result) => {

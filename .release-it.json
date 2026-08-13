@@ -1,0 +1,26 @@
+{
+	"plugins": {
+		"@release-it/bumper": {
+			"out": [
+				"manifest.json",
+				{
+					"file": "versions.json",
+					"path": "$.${version}",
+					"type": "application/json"
+				}
+			]
+		}
+	},
+	"git": {
+		"commitMessage": "chore(release): bump version to ${version}",
+		"tagName": "${version}",
+		"tagAnnotation": "Release ${version}"
+	},
+	"github": {
+		"release": true,
+		"releaseName": "${version}"
+	},
+	"npm": {
+		"publish": false
+	}
+}

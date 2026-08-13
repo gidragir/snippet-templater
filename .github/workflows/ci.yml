@@ -1,12 +1,32 @@
-name: Release Obsidian plugin
+name: CI & Release
 
 on:
     push:
-        tags:
-            - '*'
+        branches: ['**']
+        tags: ['*']
+    pull_request:
+        branches: ['**']
 
 jobs:
-    build:
+    build-and-lint:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+            - name: Use Node.js
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: 'pnpm'
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm run build
+            - run: pnpm run lint
+
+    release:
+        needs: build-and-lint
+        if: startsWith(github.ref, 'refs/tags/')
         runs-on: ubuntu-latest
         permissions:
             contents: write
@@ -14,21 +34,16 @@ jobs:
             attestations: write
         steps:
             - uses: actions/checkout@v6
-
             - uses: pnpm/action-setup@v4
               with:
-                version: 10
-
+                  version: 10
             - name: Use Node.js
               uses: actions/setup-node@v6
               with:
                   node-version: 24
                   cache: 'pnpm'
-
-            - name: Build plugin
-              run: |
-                  pnpm install --frozen-lockfile
-                  pnpm run build
+            - run: pnpm install --frozen-lockfile
+            - run: pnpm run build
 
             - name: Check for optional styles
               id: styles
@@ -50,5 +65,4 @@ jobs:
 
                   gh release create "$tag" \
                     --title="$tag" \
-                    --draft \
                     main.js manifest.json ${{ steps.styles.outputs.exists == 'true' && 'styles.css' || '' }}
