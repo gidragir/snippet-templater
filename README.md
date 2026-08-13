@@ -4,6 +4,7 @@
 
 ![Snippet Templater Preview](assets/preview.png)
 
+
 ## ✨ Key Features
 
 |   |   |
@@ -44,7 +45,7 @@ docker push $IMAGE:$TAG
 ### 2. Python Scripting
 
 ````
-```script-template lang: python
+```script-template lang:python
 import pandas as pd
 
 df = pd.read_csv("${INPUT_FILE}")
@@ -93,9 +94,9 @@ By default, language highlighting falls back to `bash`. You can specify a custom
 
 The parser recognizes variables following standard naming conventions (`[A-Za-z_][A-Za-z0-9_]*`):
 
-- Simple format: `$VARIABLE_NAME`
+- **Simple format**: `$VARIABLE_NAME`
     
-- Braced format: `${VARIABLE_NAME}`
+- **Braced format**: `${VARIABLE_NAME}`
     
 
 ## ⚙️ Installation
@@ -117,7 +118,7 @@ The parser recognizes variables following standard naming conventions (`[A-Za-z_
 
 ### Option B: Community Plugins _(Coming Soon)_
 
-Once approved in the official Obsidian Community Catalog, search for `Snippet Templater` directly inside Obsidian's settings.
+Once approved in the official Obsidian Community Catalog, search for `Snippet Templater` directly inside Obsidian's settings (**Settings → Community plugins**).
 
 ## 🛠️ Development
 
