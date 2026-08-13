@@ -1,18 +1,18 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import MyPlugin from './main';
+import type SnippetTemplaterPlugin from './main';
 
-export interface MyPluginSettings {
+export interface SnippetTemplaterSettings {
 	mySetting: string;
 }
 
-export const DEFAULT_SETTINGS: MyPluginSettings = {
+export const DEFAULT_SETTINGS: SnippetTemplaterSettings = {
 	mySetting: 'default',
 };
 
-export class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+export class SnippetTemplaterSettingTab extends PluginSettingTab {
+	plugin: SnippetTemplaterPlugin;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: SnippetTemplaterPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -29,7 +29,7 @@ export class SampleSettingTab extends PluginSettingTab {
 				text
 					.setPlaceholder('Enter your secret')
 					.setValue(this.plugin.settings.mySetting)
-					.onChange(async (value) => {
+					.onChange(async (value: string) => {
 						this.plugin.settings.mySetting = value;
 						await this.plugin.saveSettings();
 					}),
