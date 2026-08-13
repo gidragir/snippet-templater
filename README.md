@@ -25,9 +25,6 @@ Wrap your template code inside a supported code block identifier (`snippet-templ
 
 ````
 ```snippet-template lang:bash
-IMAGE="my-app"
-TAG="latest"
-
 docker build -t $IMAGE:$TAG .
 docker push $IMAGE:$TAG
 ```
