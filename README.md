@@ -1,92 +1,152 @@
-# Obsidian Sample Plugin
+# Snippet Templater for Obsidian
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+**Snippet Templater** is an Obsidian plugin that transforms static code snippets and templates into interactive live widgets. It automatically extracts variables from your code blocks, renders dynamic input fields, and provides live output preview with real-time substitution and syntax highlighting.
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+---
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
+## Features
 
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open modal (simple)" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and outputs a Notice on click.
-- Registers a global interval which logs 'setInterval' to the console.
+- ⚡ **Automatic Variable Extraction**: Automatically detects variables written as `$VARIABLE` or `${VARIABLE}`.
+- 🎛️ **Live Interactive Inputs**: Generates input fields for detected variables directly inside your note.
+- 👁️ **Side-by-Side Live Preview**: Updates the formatted result in real time as you type.
+- 🎨 **Code Block Highlighting**: Retains full syntax highlighting for languages (Docker, Bash, Python, SQL, YAML, etc.).
+- 🏷️ **Multiple Codeblock Identifiers**: Works seamlessly with ```snippet-templater```, ```snippet-template```, and ```script-template```.
+- 💬 **Flexible Language Overrides**: Specify target language in the fence header (e.g. ```` ```snippet-template lang:python ````) or on the first line inside the block (`# lang: python` or `// lang: typescript`).
 
-## First time developing plugins?
+---
 
-Quick starting guide for new plugin devs:
+## Installation
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `src/main.ts` to `main.js`.
-- Make changes to `src/main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### From Community Plugins
+*(Coming soon once accepted into the Obsidian Community Catalog)*
 
-## Releasing new releases
+### Manual Installation
+1. Download the latest release (`main.js`, `manifest.json`, and `styles.css`) from the [Releases](https://github.com/gidragir/snippet-templater/releases) page.
+2. Create a folder named `snippet-templater` inside your vault's plugin directory:
+   `<VaultPath>/.obsidian/plugins/snippet-templater/`
+3. Move the downloaded files into that folder.
+4. Reload Obsidian and enable **Snippet Templater** in **Settings → Community plugins**.
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+---
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## How to Use & Examples
 
-## Adding your plugin to the community plugin list
+To turn any snippet into an interactive template, wrap your code in a code block with one of the supported language specifiers (`snippet-templater`, `snippet-template`, or `script-template`).
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### Example 1: Docker Build & Push Script
 
-## How to use
+```markdown
+```snippet-template lang:bash
+IMAGE="my-app"
+TAG="latest"
 
-- Clone this repo.
-- Make sure your NodeJS is at least v18 (`node --version`).
-- `npm i` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint
-
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code.
-- This project already has eslint preconfigured, you can invoke a check by running`npm run lint`
-- Together with a custom eslint [plugin](https://github.com/obsidianmd/eslint-plugin) for Obsidan specific code guidelines.
-- A GitHub action is preconfigured to automatically lint every commit on all branches.
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-	"fundingUrl": "https://buymeacoffee.com"
-}
+docker build -t $IMAGE:$TAG .
+docker push $IMAGE:$TAG
+```
 ```
 
-If you have multiple URLs, you can also do:
+**What happens**:
+1. The plugin extracts `$IMAGE` and `$TAG`.
+2. Input fields for `IMAGE` and `TAG` appear on the left.
+3. The right column displays the ready-to-run bash script updating live as values are entered.
 
-```json
-{
-	"fundingUrl": {
-		"Buy Me a Coffee": "https://buymeacoffee.com",
-		"GitHub Sponsor": "https://github.com/sponsors",
-		"Patreon": "https://www.patreon.com/"
-	}
-}
+---
+
+### Example 2: Python Data Processing Script
+
+```markdown
+```script-template
+# lang: python
+import pandas as pd
+
+df = pd.read_csv("${INPUT_FILE}")
+filtered = df[df["status"] == "${STATUS}"]
+filtered.to_json("${OUTPUT_FILE}")
+```
 ```
 
-## API Documentation
+**What happens**:
+1. Language is parsed from the `# lang: python` directive on the first line.
+2. Input fields for `INPUT_FILE`, `STATUS`, and `OUTPUT_FILE` are generated.
+3. Braced variables like `${INPUT_FILE}` are replaced cleanly upon typing.
 
-See https://docs.obsidian.md
+---
+
+### Example 3: SQL Query Template
+
+```markdown
+```snippet-templater lang:sql
+SELECT id, username, email, created_at
+FROM users
+WHERE status = '$USER_STATUS'
+  AND created_at >= '$START_DATE'
+LIMIT $LIMIT_COUNT;
+```
+```
+
+---
+
+## Code Block Syntax Reference
+
+### 1. Specifying Code Language
+By default, snippets fall back to `bash`. You can specify any language supported by Obsidian using either:
+
+- **Fence Header syntax**:
+  ````markdown
+  ```script-template lang:python
+  print("Hello, $NAME")
+  ```
+  ````
+
+- **First-line comment directive**:
+  ````markdown
+  ```script-template
+  // lang: typescript
+  const user: string = "$USER_NAME";
+  ```
+  ````
+
+### 2. Variable Syntax
+The parser detects two variable formats:
+- `$VARIABLE_NAME`
+- `${VARIABLE_NAME}`
+
+Variables must start with a letter or underscore followed by alphanumeric characters or underscores (`[A-Za-z_][A-Za-z0-9_]*`).
+
+---
+
+## Development & Building
+
+This project requires [Node.js](https://nodejs.org/) (v18+) and [pnpm](https://pnpm.io/).
+
+### Setup
+```bash
+pnpm install
+```
+
+### Development (Watch mode)
+```bash
+pnpm run dev
+```
+
+### Build for Production
+```bash
+pnpm run build
+```
+
+### Linting
+```bash
+pnpm run lint
+```
+
+### Releasing
+Release process is automated with `release-it`:
+```bash
+pnpm release
+```
+
+---
+
+## License
+
+[0-BSD License](LICENSE)
