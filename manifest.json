@@ -1,7 +1,7 @@
 {
 	"id": "snippet-templater",
 	"name": "Snippet Templater",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"minAppVersion": "1.0.0",
 	"description": "Interactive widget for script templates with live variable substitution and preview.",
 	"author": "Obsidian",
