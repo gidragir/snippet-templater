@@ -1,4 +1,4 @@
-import { App, Component, MarkdownRenderer } from 'obsidian';
+import { App, MarkdownRenderChild, MarkdownRenderer } from 'obsidian';
 import {
 	extractVariables,
 	parseLanguageAndSource,
@@ -6,50 +6,85 @@ import {
 } from './parser';
 
 /**
- * Renders an interactive 2-column widget for `script-template` code blocks.
+ * Component managing the rendering and lifecycle of an interactive snippet template widget.
  */
-export function renderScriptTemplateBlock(
-	source: string,
-	el: HTMLElement,
-	app: App,
-	component: Component,
-	sourcePath: string,
-	fenceHeader?: string,
-): void {
-	el.empty();
+export class ScriptTemplateRenderChild extends MarkdownRenderChild {
+	private readonly app: App;
+	private readonly source: string;
+	private readonly sourcePath: string;
+	private readonly fenceHeader?: string;
 
-	const { language, cleanSource } = parseLanguageAndSource(source, fenceHeader);
-	const variables = extractVariables(cleanSource);
-	const values: Record<string, string> = {};
+	private language = 'bash';
+	private cleanSource = '';
+	private variables: string[] = [];
+	private values: Record<string, string> = {};
+	private resultPreContainer: HTMLElement | null = null;
 
-	// Main 2-column container
-	const containerEl = el.createDiv({ cls: 'script-template-container' });
+	constructor(
+		containerEl: HTMLElement,
+		app: App,
+		source: string,
+		sourcePath: string,
+		fenceHeader?: string,
+	) {
+		super(containerEl);
+		this.app = app;
+		this.source = source;
+		this.sourcePath = sourcePath;
+		this.fenceHeader = fenceHeader;
+	}
 
-	// Left Column
-	const leftCol = containerEl.createDiv({
-		cls: 'script-template-col script-template-left',
-	});
+	onload(): void {
+		const parsed = parseLanguageAndSource(this.source, this.fenceHeader);
+		this.language = parsed.language;
+		this.cleanSource = parsed.cleanSource;
+		this.variables = extractVariables(this.cleanSource);
 
-	// Left Top: Inputs section
-	const inputsSection = leftCol.createDiv({
-		cls: 'script-template-section script-template-inputs-section',
-	});
-	inputsSection.createDiv({
-		text: 'Variables',
-		cls: 'script-template-section-title',
-	});
+		this.containerEl.empty();
+		this.renderStructure();
+	}
 
-	const inputsContainer = inputsSection.createDiv({
-		cls: 'script-template-inputs',
-	});
-
-	if (variables.length === 0) {
-		inputsContainer.createDiv({
-			text: 'No variables found',
-			cls: 'script-template-empty',
+	private renderStructure(): void {
+		const containerEl = this.containerEl.createDiv({
+			cls: 'script-template-container',
 		});
-	} else {
-		variables.forEach((varName) => {
+
+		// Left Column
+		const leftCol = containerEl.createDiv({
+			cls: 'script-template-col script-template-left',
+		});
+		this.renderInputsSection(leftCol);
+		this.renderSourceSection(leftCol);
+
+		// Right Column
+		const rightCol = containerEl.createDiv({
+			cls: 'script-template-col script-template-right',
+		});
+		this.renderPreviewSection(rightCol);
+	}
+
+	private renderInputsSection(parentEl: HTMLElement): void {
+		const inputsSection = parentEl.createDiv({
+			cls: 'script-template-section script-template-inputs-section',
+		});
+		inputsSection.createDiv({
+			text: 'Variables',
+			cls: 'script-template-section-title',
+		});
+
+		const inputsContainer = inputsSection.createDiv({
+			cls: 'script-template-inputs',
+		});
+
+		if (this.variables.length === 0) {
+			inputsContainer.createDiv({
+				text: 'No variables found',
+				cls: 'script-template-empty',
+			});
+			return;
+		}
+
+		this.variables.forEach((varName) => {
 			const groupEl = inputsContainer.createDiv({
 				cls: 'script-template-input-group',
 			});
@@ -65,68 +100,64 @@ export function renderScriptTemplateBlock(
 				cls: 'script-template-input',
 			});
 
-			inputEl.addEventListener('input', () => {
-				values[varName] = inputEl.value;
-				updatePreview();
+			this.registerDomEvent(inputEl, 'input', () => {
+				this.values[varName] = inputEl.value;
+				this.updatePreview();
 			});
 		});
 	}
 
-	// Left Bottom: Source template preview section
-	const sourceSection = leftCol.createDiv({
-		cls: 'script-template-section script-template-source-section',
-	});
-	sourceSection.createDiv({
-		text: 'Source template',
-		cls: 'script-template-section-title',
-	});
+	private renderSourceSection(parentEl: HTMLElement): void {
+		const sourceSection = parentEl.createDiv({
+			cls: 'script-template-section script-template-source-section',
+		});
+		sourceSection.createDiv({
+			text: 'Source template',
+			cls: 'script-template-section-title',
+		});
 
-	const sourcePreContainer = sourceSection.createDiv({
-		cls: 'script-template-code-pre',
-	});
+		const sourcePreContainer = sourceSection.createDiv({
+			cls: 'script-template-code-pre',
+		});
 
-	void MarkdownRenderer.render(
-		app,
-		`\`\`\`${language}\n${cleanSource}\n\`\`\``,
-		sourcePreContainer,
-		sourcePath,
-		component,
-	);
-
-	// Right Column
-	const rightCol = containerEl.createDiv({
-		cls: 'script-template-col script-template-right',
-	});
-
-	// Right Bottom: Result preview section
-	const previewSection = rightCol.createDiv({
-		cls: 'script-template-section script-template-preview-section',
-	});
-	previewSection.createDiv({
-		text: 'Final result',
-		cls: 'script-template-section-title',
-	});
-
-	const resultPreContainer = previewSection.createDiv({
-		cls: 'script-template-code-pre',
-	});
-
-	const getCurrentResult = (): string =>
-		substituteVariables(cleanSource, values);
-
-	const updatePreview = (): void => {
-		resultPreContainer.empty();
-		const currentText = getCurrentResult();
 		void MarkdownRenderer.render(
-			app,
-			`\`\`\`${language}\n${currentText}\n\`\`\``,
-			resultPreContainer,
-			sourcePath,
-			component,
+			this.app,
+			`\`\`\`${this.language}\n${this.cleanSource}\n\`\`\``,
+			sourcePreContainer,
+			this.sourcePath,
+			this,
 		);
-	};
+	}
 
-	// Initial render update
-	updatePreview();
+	private renderPreviewSection(parentEl: HTMLElement): void {
+		const previewSection = parentEl.createDiv({
+			cls: 'script-template-section script-template-preview-section',
+		});
+		previewSection.createDiv({
+			text: 'Final result',
+			cls: 'script-template-section-title',
+		});
+
+		this.resultPreContainer = previewSection.createDiv({
+			cls: 'script-template-code-pre',
+		});
+
+		this.updatePreview();
+	}
+
+	private updatePreview(): void {
+		if (!this.resultPreContainer) {
+			return;
+		}
+
+		this.resultPreContainer.empty();
+		const currentText = substituteVariables(this.cleanSource, this.values);
+		void MarkdownRenderer.render(
+			this.app,
+			`\`\`\`${this.language}\n${currentText}\n\`\`\``,
+			this.resultPreContainer,
+			this.sourcePath,
+			this,
+		);
+	}
 }
-

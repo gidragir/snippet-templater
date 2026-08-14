@@ -4,6 +4,13 @@ export interface ParsedTemplate {
 }
 
 /**
+ * Regex matching $VAR or ${VAR} syntax.
+ * Group 1 captures braced variable name (e.g., FOO in ${FOO}).
+ * Group 2 captures simple variable name (e.g., FOO in $FOO).
+ */
+const VARIABLE_REGEX = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
+
+/**
  * Extracts language specified either in fence header (e.g. ```script-template lang:python)
  * or inline header line (# lang: python), defaulting to 'bash'.
  */
@@ -48,18 +55,18 @@ export function parseLanguageAndSource(
  * Extracts unique variable names from template text matching $VAR or ${VAR} format.
  */
 export function extractVariables(source: string): string[] {
-	const regex = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
-	const vars: string[] = [];
+	const vars = new Set<string>();
+	VARIABLE_REGEX.lastIndex = 0;
 	let match: RegExpExecArray | null;
 
-	while ((match = regex.exec(source)) !== null) {
+	while ((match = VARIABLE_REGEX.exec(source)) !== null) {
 		const varName = match[1] || match[2];
-		if (varName && !vars.includes(varName)) {
-			vars.push(varName);
+		if (varName) {
+			vars.add(varName);
 		}
 	}
 
-	return vars;
+	return Array.from(vars);
 }
 
 /**
@@ -70,10 +77,9 @@ export function substituteVariables(
 	source: string,
 	values: Record<string, string>,
 ): string {
-	const regex = /\$\{([A-Za-z_][A-Za-z0-9_]*)\}|\$([A-Za-z_][A-Za-z0-9_]*)/g;
-
+	VARIABLE_REGEX.lastIndex = 0;
 	return source.replace(
-		regex,
+		VARIABLE_REGEX,
 		(
 			fullMatch: string,
 			braceVar: string | undefined,

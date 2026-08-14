@@ -2,16 +2,10 @@ import {
 	MarkdownPostProcessorContext,
 	Plugin,
 } from 'obsidian';
-import { renderScriptTemplateBlock } from './processor';
-import { DEFAULT_SETTINGS, SnippetTemplaterSettings, SnippetTemplaterSettingTab } from './settings';
+import { ScriptTemplateRenderChild } from './processor';
 
 export default class SnippetTemplaterPlugin extends Plugin {
-	settings!: SnippetTemplaterSettings;
-
 	async onload() {
-		await this.loadSettings();
-		this.addSettingTab(new SnippetTemplaterSettingTab(this.app, this));
-
 		const processor = (
 			source: string,
 			el: HTMLElement,
@@ -24,31 +18,19 @@ export default class SnippetTemplaterPlugin extends Plugin {
 				fenceHeader = lines[sectionInfo.lineStart] || '';
 			}
 
-			renderScriptTemplateBlock(
-				source,
+			const child = new ScriptTemplateRenderChild(
 				el,
 				this.app,
-				this,
+				source,
 				ctx.sourcePath,
 				fenceHeader,
 			);
+			ctx.addChild(child);
 		};
 
 		this.registerMarkdownCodeBlockProcessor('snippet-templater', processor);
 		this.registerMarkdownCodeBlockProcessor('snippet-template', processor);
 		this.registerMarkdownCodeBlockProcessor('script-template', processor);
-	}
-
-	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<SnippetTemplaterSettings>,
-		);
-	}
-
-	async saveSettings() {
-		await this.saveData(this.settings);
 	}
 
 	onunload() {}
